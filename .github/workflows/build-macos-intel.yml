@@ -1,0 +1,45 @@
+
+name: Build PhotoCraft for macOS Intel
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build macOS x64
+    runs-on: macos-15-intel
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Verify Intel runner
+        run: |
+          uname -m
+          rustc --version || true
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Show toolchain
+        run: |
+          rustc --version
+          cargo --version
+
+      - name: Build PhotoCraft
+        run: cargo build --release -p photocraft
+
+      - name: Verify binary architecture
+        run: file target/release/photocraft
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: photocraft-macos-x64
+          path: target/release/photocraft
+          if-no-files-found: error
+          retention-days: 14
